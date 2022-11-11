@@ -75,7 +75,7 @@ function fibonacci(n) {
  */
 function getOperationFn(initialValue, operatorFn) {
     let storedValue = initialValue;
-    if (operatorFn == undefined) {
+    if (!operatorFn) {
         return () => {
             return initialValue;
         };
@@ -103,28 +103,12 @@ function getOperationFn(initialValue, operatorFn) {
  * console.log(generator()); // 9
  */
 function sequence(start, step) {
-    let storedValue;
-    if (start == undefined && step == undefined) {
-        storedValue = -1;
-        return () => {
-            return (storedValue = storedValue + 1);
-        };
-    } else if (start == undefined) {
-        storedValue = -step;
-        return () => {
-            return (storedValue = storedValue + step);
-        };
-    } else if (step == undefined) {
-        storedValue = start - 1;
-        return () => {
-            return (storedValue = storedValue + 1);
-        };
-    } else {
-        storedValue = start - step;
-        return () => {
-            return (storedValue = storedValue + step);
-        };
-    }
+    start = start ?? 0;
+    step = step ?? 1;
+    let storedValue = start - step;
+    return () => {
+        return (storedValue += step);
+    };
 }
 
 /**
@@ -142,13 +126,25 @@ function sequence(start, step) {
  * deepEqual({arr: [22, 33], text: 'text'}, {arr: [22, 3], text: 'text2'}) // false
  */
 function deepEqual(firstObject, secondObject) {
-    let propsInFirstObject = 0,
-        propsInSecondObject = 0;
-    for (let prop in firstObject) {
-        propsInFirstObject += 1;
+    if (firstObject === secondObject) {
+        return true;
     }
-    for (var prop in secondObject) {
-        propsInSecondObject += 1;
+    if (
+        firstObject === null ||
+        typeof firstObject != 'object' ||
+        secondObject === null ||
+        typeof secondObject != 'object'
+    ) {
+        return false;
+    }
+
+    let propsFirstObject = 0,
+        propsSecondObject = 0;
+    for (let prop in firstObject) {
+        propsFirstObject += 1;
+    }
+    for (let prop in secondObject) {
+        propsSecondObject += 1;
         if (
             !(prop in firstObject) ||
             !deepEqual(firstObject[prop], secondObject[prop])
@@ -156,9 +152,8 @@ function deepEqual(firstObject, secondObject) {
             return false;
         }
     }
-    return propsInFirstObject == propsInSecondObject;
+    return propsFirstObject === propsSecondObject;
 }
-
 module.exports = {
     isInteger,
     even,
